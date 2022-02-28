@@ -1,4 +1,4 @@
-Metadata-Version: 1.0
+Metadata-Version: 2.1
 Name: Plant-Nanny-DB
 Version: 1.1.0
 Summary: Enable read/write functionality for Plant Nanny Database
@@ -26,11 +26,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-Description: # Plant Nanny
-        This is a project that uses various sensors/instruments to automate and monitor
-        plant-care tasks.
-        
-        This project alerts person(s) via email for important alerts, progress updates, 
-        and other various information regarding the plant or the system.
-        
+Description: readme.md
 Platform: UNKNOWN
+Description-Content-Type: text/markdown
