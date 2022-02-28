@@ -9,7 +9,7 @@ with open('LICENSE.txt') as f:
 
 setup(
     name='Plant-Nanny-DB',
-    version='1.1.0',
+    version='1.1.1',
     description='Enable read/write functionality for Plant Nanny Database',
     long_description='readme.md',
     long_description_content_type = 'text/markdown',
