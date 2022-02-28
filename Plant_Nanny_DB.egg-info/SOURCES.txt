@@ -1,0 +1,6 @@
+README.md
+setup.py
+Plant_Nanny_DB.egg-info/PKG-INFO
+Plant_Nanny_DB.egg-info/SOURCES.txt
+Plant_Nanny_DB.egg-info/dependency_links.txt
+Plant_Nanny_DB.egg-info/top_level.txt
