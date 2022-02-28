@@ -1,0 +1,15 @@
+This file is meant to outline the general project "to do" list
+    It is not meant for outlining "to do" or "fix me" statements for existing code; 
+    Those statements will exist within the code itself
+
+TODO:
+    - build requirements.txt file for project dependencies
+    - database setup script if database doesn't already exist (typically for initial setup)
+    - preserving website files in repository
+    - write "Docs" support files
+    - write test scripts
+    - simplify & standardize graph configurations
+
+DONE:
+    2020-11-06
+        - write dictionaries in settings.py (or build dictionaries from database???)
