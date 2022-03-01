@@ -9,7 +9,7 @@ with open('LICENSE.txt') as f:
 
 setup(
     name='Plant-Nanny-DB',
-    version='1.2.0',
+    version='1.2.1',
     description='Enable read/write functionality for Plant Nanny Database',
     long_description='readme.md',
     long_description_content_type = 'text/markdown',
@@ -19,5 +19,5 @@ setup(
     license=license,
     packages=find_packages(exclude=('tests', 'sensors')),
     include_package_data = True,
-    install_requires = ["mysql", "importlib", "ast"]
+    install_requires = ["mysqlclient", "importlib", "ast"]
 )
