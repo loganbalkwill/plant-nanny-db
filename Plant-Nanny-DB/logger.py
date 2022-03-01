@@ -4,7 +4,7 @@ import os, sys
 sys.path.insert(0, '..')
 
 import settings
-import supporting_modules.database_use as db
+import __main__ as db
 
 def log_action(event,result, additional_info=''):
     #break apart event into components

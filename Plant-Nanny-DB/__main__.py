@@ -1,139 +1,155 @@
-#!/usr/bin/env python
+#Created by Logan Balkwill
+#Created on 8-30-2020
+import sys
+from importlib import reload as reload
 
-"""main.py:    
-               -hosts main project code
-               -hosts list and notes for unfinished project sections
-"""
+import mysql.connector
 
-__author__    = "Logan Balkwill"
-__date__      = "September 10, 2020"
-__version__   = "1.2.1"
-__maintainer__= "Logan Balkwill"
-__email__     = "lgb0020@gmail.com"
-
-
-import time
-import math
+sys.path.insert(0, '..')
 import settings as s
-import supporting_modules.looping as looping
-import supporting_modules.logger as logging
-import supporting_modules.actions as actions
-import supporting_modules.device_info as device_info
-import supporting_modules.database_use as db
+import dictionaries
 
+
+#The below import statement is used in the log_information function
+import logger
+reload(logger)
+
+""" TODO
+        -Logging database actions
+        -Clean up module (lots of redundant functions)
 """
-GENERAL ALGORITHM:
+
+def log_information(severity, msg,log_local=False):
+    #import supporting_modules.logger as logger
+    logger.log_info(log_level=severity, message=msg, local=log_local)
     
-    STARTUP:
-        -CHECK AVAILABLE PERIPHERALS
-        -CHECK DATABASE CONNECTION
-            -UPLOAD QUEUED LOGS (IF EXISTS)
-        -CHECK EMAILING FUNCTIONALITY
-        -CALCULATE SLEEP FREQUENCY BETWEEN LOOPS
+def log_locally(i, f):
+    #import supporting_modules.logger as logger
+    logger.log_locally(info=i,filename=f)
+    
+
+#Import SQL dictionaries:
+sql_insert=dictionaries.sql_insert.copy()
+sql_select=dictionaries.sql_select.copy()
+
+#Import specified database connection properties
+if s.database_connection=='Local':
+    db_properties=s.database_local.copy()
+elif s.database_connection=='Remote':
+    db_properties=s.database_remote.copy()
+else:
+    raise Exception("Database connection property not valid! Please update database_connection value in settings.py")
+
+#Establish connection to database
+try:
+    plant_db=mysql.connector.connect(host=db_properties['hostname'],
+                                     user=db_properties['db_username'],
+                                     password=db_properties['db_password'],
+                                     database=db_properties['db_name'])
+    
+    log_information(severity='p',
+                    msg=("connection to database '%s' was successfull" % db_properties['db_name']))
+    
+except:
+    log_information(severity='p',
+                    msg=("FAILED to connect to database '%s'" % db_properties['db_name'])) 
+
+
+def write_to_db(table, write_info,db=plant_db, log_local=True):
+    #Write data to the database table
+    
+    #build SQL command string
+    sql=build_SQL_insert(table)
+    
+    #insert into database
+    try:
+        cursor=db.cursor()
+        cursor.execute(sql, write_info)
         
-    MAIN LOOP:
-        -READ REQUIRED INSTRUMENTS
-        -WRITE ^ TO DATABASE
-        -CHECK VALUE AGAINST ALLOWABLE CONSTRAINTS
-        -PERFORM ACTION(S) AS REQUIRED:
-            -PERFORM PHYSICAL ACTION (I.E. WATER)
-            -NOTIFY SUBSCRIBER(S) VIA EMAIL
-
------------------------------------------------------------------
-
-VERSIONING:
-    1.0.1                   -   I AM BORN
-    1.1.1                   -   Major code restructuring (no significant program impact)
-    1.2.1   (2020-12-18)    -   Patches to fit new db structure 
-"""
-
-#TODO: find good way of resetting the loop counter
-
-
-#########################
-### STARTUP PROCEDURE ###
-#########################
-
-#Initialize Global Variables
-i2c_available=[]
-plant_devices_list=[]
-action_freq_list=[]
-loop_freq=s.read_frequency_mins
-logs_queued=0
-
-def startup():
-    #Acknowledge global variables
-    global i2c_available, plant_devices_list, action_freq_list, loop_freq, logs_queued
+        db.commit()
+        
+        log_information(severity='p', msg=str(cursor.rowcount) + (" record inserted to %s table" % table))
     
-    #Check Peripherals
-    #Build list of sensors in-use
-    i2c_available=device_info.find_i2c_devices()
-    plant_devices_list=db.build_plant_devices_list()
-    action_freq_list=looping.get_action_freqs(plant_devices_list)
-    
+    except:
+        #failed to write to the database; store info locally
+        log_information(severity='p', msg="Failed to write to database")
+        if log_local==True:
+            log_locally(i=write_info, f=table)
+        else: raise Exception("Information not logged!!!")
 
-        #Calculate looping frequency
-    loop_freq=looping.get_loop_frequency(action_freq_list)
+def query_db(sql_string):
+    #Handles database queries; returns query results
+    results=[]
 
-    #Check Database Connection
-        #Check for queued logs
-    logs_queued_prev = logs_queued
-    logs_queued, msg = logging.local_logs_exist()
+    try:
+        #Validate the query string
+        if (sql_string.find('SELECT')==-1) and (sql_string.find('select')==-1):
+            #INVALID!! the provided string may be a 'UPDATE','DELETE', or other style string
+            raise Exception('Error retrieving info from database... SQL string does not contain a SELECT statement!!')
+
+        #Run Query
+        mycursor=plant_db.cursor()
+        mycursor.execute(sql_string)
+        
+        results=mycursor.fetchall()
+        mycursor.close()
+
+        return results
+
+    except Exception as err:
+        #Could not process query; Log error info locally
+
+        log_information(severity='p', msg="Failed to query database!!")
+        log_information(severity='s', msg=err, log_local=True)
+
+        return results
+
+
+def build_SQL_insert(table_name):
+    #returns sql string of command
     
-    if logs_queued > 0 and logs_queued != logs_queued_prev:
-        logging.log_info(log_level='i', message=msg)
+    if table_name in sql_insert:
+        return sql_insert[table_name]
     else:
-        logging.log_info(log_level='p',message=msg)
+        return ''
+
+
+def get_sensor_list(additional_sql):
+    #returns list of active sensors
     
-    if logs_queued > 0:
-        logging.upload_local_logs()
-
-    #Check Emailing Functionality
-
-
-
-
-#########################
-####### MAIN LOOP #######
-#########################
-def main():
+    #build SQL query string
+    sql= sql_select['sensors']
     
-    loopcounter=1
-    
-    while 1==1:
+    if len(additional_sql)>1:
+        sql=sql + " WHERE " + additional_sql 
         
-        #Check sensors
-        for action in plant_devices_list:
-            Assigned_id, Assigned_type, Assigned_name, device_id, device_name, action_freq=action
-            
-            #Condition frequency value (if required)
-            action_freq=looping.condition_frequency(action_freq)
-            
-            #Check if interval has elapsed
-            if(loopcounter % action_freq==0):
-                #Yes; Perform Action
-                try:
-                    actions.perform_action(action)
-                    logging.log_action(action,"success")
-                except:
-                    logging.log_action(action,"failure")
-        
-        #Check if system check interval has elapsed
-        if (loopcounter % s.refresh_mins == 0):
-            logging.log_info( log_level='p', message="Checking for new information...")
-            startup() #yep; run the startup procedure again
-        
-        
-        #Increment interval counter
-        try:
-            loopcounter+=1
-        except:
-            looping.reset_loopcounter(loopcounter)
-            
-            
-        time.sleep(60*loop_freq)
-        
+    #execute query
+    return query_db(sql_string=sql)
 
-if __name__=='__main__':
-    startup()
-    main()
+def get_sensor_frequencies(additional_sql):
+    #returns list of sensor read frequencies
+    
+    #build SQL query string
+    sql= sql_select['sensor_freq']
+    
+    if len(additional_sql)>1:
+        sql=sql + " WHERE " + additional_sql 
+        
+    #execute query
+    return query_db(sql_string=sql)
+
+
+def build_plant_devices_list():
+    #Used to build the main list of plant devices and characteristics used in program
+    #Output tuple as: PlantID, Plant Name, Device_ID, Device Name, Action_Frequency_Min
+    
+    #Get SQL string
+    sql=sql_select['device_assignments'] 
+
+    #execute query
+    return query_db(sql_string=sql)
+
+
+if __name__=="__main__":
+    log_information(severity='p', msg="Attempting to write to DB")
+    write_to_db(db=plant_db,table='soilsensor_trans',write_info=['2020-08-31','1',20,390])

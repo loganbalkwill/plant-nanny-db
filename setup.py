@@ -18,5 +18,6 @@ setup(
     url='https://github.com/loganbalkwill/plant-nanny-db',
     license=license,
     packages=find_packages(exclude=('tests', 'sensors')),
-    include_package_data = True
+    include_package_data = True,
+    install_requires = ["mysql", "importlib", "ast"]
 )
