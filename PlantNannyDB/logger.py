@@ -3,8 +3,8 @@ from datetime import datetime
 import os, sys
 sys.path.insert(0, '..')
 
-import settings
-import __main__ as db
+import PlantNannyDB.settings as settings
+import PlantNannyDB.database_use as db
 
 def log_action(event,result, additional_info=''):
     #break apart event into components

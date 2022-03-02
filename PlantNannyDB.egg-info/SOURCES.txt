@@ -1,7 +1,7 @@
 README.md
 setup.py
 PlantNannyDB/__init__.py
-PlantNannyDB/__main__.py
+PlantNannyDB/database_use.py
 PlantNannyDB/dictionaries.py
 PlantNannyDB/logger.py
 PlantNannyDB/settings.py

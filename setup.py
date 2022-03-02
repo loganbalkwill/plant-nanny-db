@@ -14,14 +14,14 @@ except:
 
 setup(
     name='PlantNannyDB',
-    version='1.2.6',
+    version='1.3.6',
     description='Enable read/write functionality for Plant Nanny Database',
-    long_description='readme.md',
+    long_description="README.md",
     long_description_content_type = 'text/markdown',
     author='Logan Balkwill',
     author_email='lgb0020@gmail.com',
     url='https://github.com/loganbalkwill/plant-nanny-db',
-    license='LICENSE.txt',
+    license="MIT",
     packages=find_packages(exclude=('tests', 'sensors')),
     include_package_data = True,
     install_requires = ["mysqlclient", "importlib"]
