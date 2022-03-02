@@ -13,8 +13,8 @@ except:
     pass
 
 setup(
-    name='Plant-Nanny-DB',
-    version='1.2.4',
+    name='PlantNannyDB',
+    version='1.2.5',
     description='Enable read/write functionality for Plant Nanny Database',
     long_description='readme.md',
     long_description_content_type = 'text/markdown',
