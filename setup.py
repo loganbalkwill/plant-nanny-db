@@ -14,7 +14,7 @@ except:
 
 setup(
     name='Plant-Nanny-DB',
-    version='1.2.3',
+    version='1.2.4',
     description='Enable read/write functionality for Plant Nanny Database',
     long_description='readme.md',
     long_description_content_type = 'text/markdown',
@@ -24,5 +24,5 @@ setup(
     license_files='LICENSE.txt',
     packages=find_packages(exclude=('tests', 'sensors')),
     include_package_data = True,
-    install_requires = ["mysqlclient", "importlib", "ast"]
+    install_requires = ["mysqlclient", "importlib"]
 )
