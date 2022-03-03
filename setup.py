@@ -14,7 +14,7 @@ except:
 
 setup(
     name='PlantNannyDB',
-    version='1.3.6',
+    version='1.4.6',
     description='Enable read/write functionality for Plant Nanny Database',
     long_description="README.md",
     long_description_content_type = 'text/markdown',

@@ -6,6 +6,7 @@ sys.path.insert(0, '..')
 import PlantNannyDB.settings as settings
 import PlantNannyDB.database_use as db
 
+
 def log_action(event,result, additional_info=''):
     #break apart event into components
     Assigned_id, Assigned_type, Assigned_name, device_id, device_name, action_freq=event

@@ -12,7 +12,7 @@ import PlantNannyDB.dictionaries as dictionaries
 
 #The below import statement is used in the log_information function
 import PlantNannyDB.logger as logger
-#reload(logger)
+reload(logger)
 
 """ TODO
         -Logging database actions
@@ -26,11 +26,6 @@ def log_information(severity, msg,log_local=False):
 def log_locally(i, f):
     #import supporting_modules.logger as logger
     logger.log_locally(info=i,filename=f)
-    
-
-#Import SQL dictionaries:
-sql_insert=dictionaries.sql_insert.copy()
-sql_select=dictionaries.sql_select.copy()
 
 #Import specified database connection properties
 if s.database_connection=='Local':
@@ -113,7 +108,22 @@ def build_SQL_insert(table_name):
     else:
         return ''
 
-
+def get_sql_dictionary(category):
+    # build dictionaries from database if possible. otherwise default to package-stored dictionary
+    sql = 'SELECT id_scriptname, script FROM def_SQLscripts WHERE active=1 and script_type="' + category + '"'
+    
+    try:
+        dic = query_db(sql)
+        return dict(dic)
+    except:
+        print("WARNING: unable to query database while attempting to build libraries. Using default libraries...")
+        if category == "INSERT":
+            return dictionaries.sql_insert.copy()
+        elif category == "SELECT":
+            return dictionaries.sql_select.copy()
+        else:
+            raise Exception("Unexpected value passed in when trying to build SQL dictionaries. Expected SELECT or INSERT. Value supplied - ", category)
+    
 def get_sensor_list(additional_sql):
     #returns list of active sensors
     
@@ -149,6 +159,9 @@ def build_plant_devices_list():
     #execute query
     return query_db(sql_string=sql)
 
+#Import SQL dictionaries:
+sql_insert=get_sql_dictionary("INSERT")
+sql_select=get_sql_dictionary("SELECT")
 
 if __name__=="__main__":
     log_information(severity='p', msg="Attempting to write to DB")
